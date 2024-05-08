@@ -89,10 +89,3 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
-
-int 
-sys_pptable(void)
-{
-
-  return 2024;
-}
