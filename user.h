@@ -38,4 +38,4 @@ void* malloc(uint);
 void free(void*);
 int atoi(const char*);
 
-int pptable(void);
+int ps(void);

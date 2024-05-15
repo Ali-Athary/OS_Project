@@ -91,8 +91,8 @@ sys_uptime(void)
 }
 
 int 
-sys_pptable(void)
+sys_ps(void)
 {
-
-  return 2024;
+  ps();
+  return 0;
 }

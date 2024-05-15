@@ -532,3 +532,24 @@ procdump(void)
     cprintf("\n");
   }
 }
+
+void
+ps(void)
+{
+  cprintf("  pid   state\n");
+  for(int i = 0; i < NPROC; i++){
+    if(ptable.proc[i].state != 0){
+      char* state = "";
+      switch (ptable.proc[i].state) 
+        {
+            case UNUSED: state = "UNUSED";
+            case EMBRYO: state = "EMBRYO";
+            case SLEEPING: state = "SLEEPING";
+            case RUNNABLE: state = "RUNNABLE";
+            case RUNNING: state = "RUNNING";
+            case ZOMBIE: state = "ZOMBIE";
+        }
+      cprintf("  %d     %s\n", ptable.proc[i].pid, state);
+    }
+  }
+}

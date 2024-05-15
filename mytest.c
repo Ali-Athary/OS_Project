@@ -4,6 +4,8 @@
 
 int main(void) 
 {
-printf(1, "Note: Unix V6 was released in year %d\n", pptable());
+    printf(0, "--- start pptable ---\n");
+    ps();
+    printf(0, "--- end pptable ---\n");
     exit();
 } 
