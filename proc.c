@@ -572,7 +572,6 @@ int
 ps(int state,
   int pid,
   struct process_info_t *info) {
-    info->pid = 12345;
 
   struct proc *p = 0;
   struct proc *closest_proc = 0;
