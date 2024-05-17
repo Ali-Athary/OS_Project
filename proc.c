@@ -536,6 +536,9 @@ procdump(void)
 void
 ps(void)
 {
+  struct proc *p;
+  sti();
+  acquire(&ptable.lock);
   cprintf("  pid   state\n");
   for(int i = 0; i < NPROC; i++){
     if(ptable.proc[i].state != 0){
@@ -552,4 +555,7 @@ ps(void)
       cprintf("  %d     %s\n", ptable.proc[i].pid, state);
     }
   }
+  release(&ptable.lock);
+
+  return 22;
 }
