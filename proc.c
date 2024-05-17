@@ -6,6 +6,7 @@
 #include "x86.h"
 #include "proc.h"
 #include "spinlock.h"
+#include "process_info_t.h"
 
 
 struct {
@@ -561,14 +562,17 @@ procdump(void)
 //  return 22;
 //}
 
+int abs(int a){
+  if (a < 0)
+  return -a;
+  return a;
+}
 
-int ps(void) {
-  int state;
-  int pid;
-  process_info_t *info;
-
-  if (argint(0, &state) < 0 || argint(1, &pid) < 0 || argptr(2, (void*)&info, sizeof(*info)) < 0)
-    return -1;
+int
+ps(int state,
+  int pid,
+  struct process_info_t *info) {
+    info->pid = 12345;
 
   struct proc *p = 0;
   struct proc *closest_proc = 0;
@@ -594,7 +598,7 @@ int ps(void) {
   }
   release(&ptable.lock);
 
-  return 22;
+  return 0;
 }
 
 

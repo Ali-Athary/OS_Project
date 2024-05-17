@@ -1,7 +1,4 @@
 // Per-CPU state
-#define _PROC_H_
-#ifndef _PROC_H_
-
 
 struct cpu {
   uchar apicid;                // Local APIC ID
@@ -60,13 +57,3 @@ struct proc {
 //   original data and bss
 //   fixed-size stack
 //   expandable heap
-
-
-typedef struct {
-  int pid;              
-  int ppid;             
-  int state;           
-  char name[16];        
-} process_info_t;
-
-#endif // _PROC_H_
