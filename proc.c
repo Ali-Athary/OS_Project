@@ -6,6 +6,8 @@
 #include "x86.h"
 #include "proc.h"
 #include "spinlock.h"
+#include "process_info_t.h"
+
 
 struct {
   struct spinlock lock;
@@ -533,23 +535,112 @@ procdump(void)
   }
 }
 
-void
-ps(void)
-{
-  cprintf("  pid   state\n");
-  for(int i = 0; i < NPROC; i++){
-    if(ptable.proc[i].state != 0){
-      char* state = "";
-      switch (ptable.proc[i].state) 
-        {
-            case UNUSED: state = "UNUSED";
-            case EMBRYO: state = "EMBRYO";
-            case SLEEPING: state = "SLEEPING";
-            case RUNNABLE: state = "RUNNABLE";
-            case RUNNING: state = "RUNNING";
-            case ZOMBIE: state = "ZOMBIE";
-        }
-      cprintf("  %d     %s\n", ptable.proc[i].pid, state);
+//void
+//ps(void)
+//{
+//  struct proc *p;
+//  sti();
+//  acquire(&ptable.lock);
+//  cprintf("  pid   state\n");
+//  for(int i = 0; i < NPROC; i++){
+//    if(ptable.proc[i].state != 0){
+//      char* state = "";
+//      switch (ptable.proc[i].state) 
+//        {
+//            case UNUSED: state = "UNUSED";
+//            case EMBRYO: state = "EMBRYO";
+//            case SLEEPING: state = "SLEEPING";
+//            case RUNNABLE: state = "RUNNABLE";
+//            case RUNNING: state = "RUNNING";
+//            case ZOMBIE: state = "ZOMBIE";
+//        }
+//      cprintf("  %d     %s\n", ptable.proc[i].pid, state);
+//    }
+//  }
+//  release(&ptable.lock);
+
+//  return 22;
+//}
+
+int abs(int a){
+  if (a < 0)
+  return -a;
+  return a;
+}
+
+int
+ps(int state,
+  int pid,
+  struct process_info_t *info) {
+
+  struct proc *p = 0;
+  struct proc *closest_proc = 0;
+  int min_diff = __INT_MAX__;
+
+  acquire(&ptable.lock);
+  for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+    if (p->state == state && (p->pid == pid || abs(p->pid - pid) < min_diff)) {
+      closest_proc = p;
+      min_diff = abs(p->pid - pid);
+      if (p->pid == pid) {
+        break;
+      }
     }
   }
+  if (closest_proc) {
+    info->pid = closest_proc->pid;
+    info->ppid = closest_proc->parent ? closest_proc->parent->pid : 0;
+    info->state = closest_proc->state;
+    safestrcpy(info->name, closest_proc->name, sizeof(info->name));
+  } else {
+    memset(info, 0, sizeof(*info));
+  }
+  release(&ptable.lock);
+
+  return 0;
 }
+
+
+
+//void ps(state_t state, pid_t pid, process_info_t* procInfos) {
+//    cprintf(" pid state parent name\n");
+//    for(int i = 0; i < NPROC; i++) {
+//        if(ptable.proc[i].state != UNUSED &&
+//           (state == 0 || ptable.proc[i].state == state) &&
+//           (pid == 0 || ptable.proc[i].pid == pid || nearestPid(pid, ptable.proc[i].pid))) {
+//            procInfos->pid = ptable.proc[i].pid;
+//            procInfos->parentPid = ptable.proc[i].parent->pid;
+//            procInfos->state = ptable.proc[i].state;
+//            safestrcpy(procInfos->name, ptable.proc[i].name, sizeof(procInfos->name));
+//            cprintf(" %d %s %d %s\n", procInfos->pid, stateName(procInfos->state),
+//                    procInfos->parentPid, procInfos->name);
+//        }
+//    }
+//}
+
+//bool nearestPid(pid_t pid, pid_t currentPid) {
+//    static pid_t nearestPid = 0;
+//    if(pid == 0) return true;
+//    if(nearestPid == 0 || abs(pid - currentPid) < abs(pid - nearestPid))
+//        nearestPid = currentPid;
+//    return false;
+//}
+
+//char* stateName(state_t state) {
+//    switch(state) {
+//        case UNUSED:
+//            return "UNUSED";
+//        case EMBRYO:
+//            return "EMBRYO";
+//        case SLEEPING:
+//            return "SLEEPING";
+//        case RUNNABLE:
+//            return "RUNNABLE";
+//        case RUNNING:
+//            return "RUNNING";
+//        case ZOMBIE:
+//            return "ZOMBIE";
+//        default:
+//            return "UNKNOWN";
+//    }
+//}
