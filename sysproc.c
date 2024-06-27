@@ -6,7 +6,6 @@
 #include "memlayout.h"
 #include "mmu.h"
 #include "proc.h"
-#include "process_info_t.h"
 
 int
 sys_fork(void)
@@ -89,18 +88,4 @@ sys_uptime(void)
   xticks = ticks;
   release(&tickslock);
   return xticks;
-}
-
-int 
-sys_ps(void)
-{
-  int state;
-  int pid;
-  struct process_info_t *info;
-
-  if (argint(0, &state) < 0 || argint(1, &pid) < 0 || argptr(2, (void*)&info, sizeof(info)) < 0)
-    return -1;
-
-  ps(state, pid, info);
-  return 0;
 }
