@@ -227,3 +227,10 @@ cmostime(struct rtcdate *r)
   *r = t1;
   r->year += 2000;
 }
+
+// set the Local APIC timer interval
+void
+setlapictimer(int interval)
+{
+    lapicw(TICR, 10000000);
+}

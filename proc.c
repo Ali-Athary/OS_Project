@@ -7,6 +7,8 @@
 #include "proc.h"
 #include "spinlock.h"
 
+uint context_switches = 0;
+
 struct {
   struct spinlock lock;
   struct proc proc[NPROC];
@@ -321,6 +323,98 @@ wait(void)
 //      via swtch back to the scheduler.
 void
 scheduler(void)
+{
+  struct proc *p;
+  struct cpu *c = mycpu();
+  c->proc = 0;
+  uint runable_count = 0;
+  uint runable_count_check = 0;
+  uint timer_intervals = 10000000;
+  
+  for(;;){
+    // Enable interrupts on this processor.
+    sti();
+
+    // Loop over process table looking for process to run.
+    runable_count = 0;
+    acquire(&ptable.lock);
+    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+      if(p->state != RUNNABLE)
+        continue;
+      
+      context_switches++;
+      runable_count++;
+
+      // Switch to chosen process.  It is the process's job
+      // to release ptable.lock and then reacquire it
+      // before jumping back to us.
+      c->proc = p;
+      switchuvm(p);
+      p->state = RUNNING;
+
+      swtch(&(c->scheduler), p->context);
+      switchkvm();
+
+      // Process is done running for now.
+      // It should have changed its p->state before coming back.
+      c->proc = 0;
+    }
+    runable_count_check = 0;
+    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+      if(p->state != RUNNABLE)
+        continue;
+      
+      runable_count_check++;
+    }
+    if(runable_count_check <= 2)
+      timer_intervals = 10000000;
+    else if(runable_count <= runable_count_check && timer_intervals <= 2000000000)
+      timer_intervals<<=1;
+    setlapictimer(timer_intervals);
+    release(&ptable.lock);
+  }
+}
+
+void
+scheduler_rr(void)
+{
+   struct proc *p;
+  struct cpu *c = mycpu();
+  c->proc = 0;
+  
+  for(;;){
+    // Enable interrupts on this processor.
+    sti();
+
+    // Loop over process table looking for process to run.
+    acquire(&ptable.lock);
+    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+      if(p->state != RUNNABLE)
+        continue;
+
+      context_switches++;
+
+      // Switch to chosen process.  It is the process's job
+      // to release ptable.lock and then reacquire it
+      // before jumping back to us.
+      c->proc = p;
+      switchuvm(p);
+      p->state = RUNNING;
+
+      swtch(&(c->scheduler), p->context);
+      switchkvm();
+
+      // Process is done running for now.
+      // It should have changed its p->state before coming back.
+      c->proc = 0;
+    }
+    release(&ptable.lock);
+
+  }
+}
+
+void
+scheduler_backup(void)
 {
   struct proc *p;
   struct cpu *c = mycpu();

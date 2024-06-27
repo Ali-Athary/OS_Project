@@ -56,3 +56,6 @@ struct proc {
 //   original data and bss
 //   fixed-size stack
 //   expandable heap
+
+// Total number of context switches 
+extern uint context_switches;

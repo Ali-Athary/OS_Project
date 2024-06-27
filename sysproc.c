@@ -89,3 +89,11 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+
+int
+sys_getcontextswitches(void)
+{
+  cprintf("#####sys_getcontextswitches : %d\n", context_switches);
+  return context_switches;
+}
