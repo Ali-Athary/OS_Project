@@ -94,6 +94,5 @@ sys_uptime(void)
 int
 sys_getcontextswitches(void)
 {
-  cprintf("#####sys_getcontextswitches : %d\n", context_switches);
   return context_switches;
 }
